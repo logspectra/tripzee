@@ -1,0 +1,9 @@
+node_modules/
+dist/
+target/
+backend/data/
+backend/src/main/resources/static/
+.env
+*.log
+.DS_Store
+.idea/

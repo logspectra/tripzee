@@ -1,0 +1,35 @@
+# Production-like stack: Tripzee + PostgreSQL. Usage: docker compose up --build
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: tripzee
+      POSTGRES_USER: tripzee
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tripzee -d tripzee"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/tripzee
+      DATABASE_USER: tripzee
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@tripzee.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe-Admin123}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8085}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      OSM_USER_AGENT: "${OSM_USER_AGENT:-Tripzee/0.1 (contact: you@example.com)}"
+
+volumes:
+  pgdata:

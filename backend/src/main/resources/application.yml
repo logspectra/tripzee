@@ -1,0 +1,57 @@
+server:
+  port: ${PORT:8085}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      timeout: 7d
+      cookie:
+        name: TZSESSION
+        http-only: true
+        same-site: lax
+        secure: ${COOKIE_SECURE:false}
+
+spring:
+  application:
+    name: tripzee
+  config:
+    import: optional:file:.env[.properties]
+  # Local default: embedded H2 file database (PostgreSQL compatibility mode).
+  # Production: set DATABASE_URL=jdbc:postgresql://host:5432/tripzee (+ user/password).
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:file:./data/tripzee;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH}
+    username: ${DATABASE_USER:sa}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  web:
+    resources:
+      # Built frontend (web/dist) is copied here for single-jar deployment.
+      static-locations: classpath:/static/
+
+logging:
+  level:
+    com.tripzee: INFO
+
+tripzee:
+  admin-email: ${ADMIN_EMAIL:admin@tripzee.local}
+  admin-password: ${ADMIN_PASSWORD:ChangeMe-Admin123}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8085}
+  external-lookups: ${EXTERNAL_LOOKUPS:true}
+  llm:
+    api-key: ${LLM_API_KEY:}
+    base-url: ${LLM_BASE_URL:https://api.openai.com/v1}
+    model: ${LLM_MODEL:gpt-4o-mini}
+  osm:
+    # Nominatim's usage policy requires an identifying User-Agent with contact info.
+    user-agent: ${OSM_USER_AGENT:Tripzee/0.1 (local development)}
+    nominatim-url: ${NOMINATIM_URL:https://nominatim.openstreetmap.org}
+    osrm-url: ${OSRM_URL:https://routing.openstreetmap.de}
+    overpass-urls: ${OVERPASS_URLS:https://overpass-api.de/api/interpreter,https://overpass.kumi.systems/api/interpreter}
